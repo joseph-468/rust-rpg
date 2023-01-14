@@ -54,6 +54,7 @@ fn main() {
             _ => println!("Type \"help\" for a list of commands"),
         }
         
+        // Nice little arrow typing prompt
         print!(">");
         io::stdout().flush().expect("Flush failed");
     }
