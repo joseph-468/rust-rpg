@@ -1,9 +1,11 @@
 use std::io;
+use std::process::exit;
 
 // Constants
 const INV_SIZE: i32 = 10;
 const INV_WIDTH: i32 = 5;
 const EMPTY_STRING: String = String::new();
+const HELP_COMMAND: &str = "inventory: access your inventory\nw, a, s, d: walk forwards, left, backwards or right";
 
 // Classes
 struct Player {
@@ -22,6 +24,10 @@ fn main() {
         inventory: [EMPTY_STRING; INV_SIZE as usize],
     };
 
+    // Temporary menu
+    print!("\x1B[2J\x1B[1;1H");
+    println!("Welcome!");
+
     // Game loop
     loop {
         // Get input
@@ -31,9 +37,13 @@ fn main() {
             .expect("Readline failed"); 
         let input = input.trim().to_lowercase();
         
+        // Clear screen
+        print!("\x1B[2J\x1B[1;1H");
+
         // Process input
         match input.as_str() {
-            "help" => println!("I am here to help."),
+            "help" => println!("{}", HELP_COMMAND),
+            "exit" => exit(0),
             "inventory" => open_inventory(&mut player),
             _ => println!("Command isn't recognised. Type \"help\" for a list of commands."),
         }
