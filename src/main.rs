@@ -1,4 +1,5 @@
 use std::io;
+use std::io::Write;
 use std::process::exit;
 
 // Constants
@@ -13,6 +14,7 @@ struct Player {
     damage: u32,
     defence: u32,
     inventory: [String; INV_SIZE as usize],
+    position: (i32, i32), // x, y centered on 0, 0
 }
 
 fn main() {
@@ -22,11 +24,13 @@ fn main() {
         damage: 10,
         defence: 5,
         inventory: [EMPTY_STRING; INV_SIZE as usize],
+        position: (0, 0),
     };
 
     // Temporary menu
     print!("\x1B[2J\x1B[1;1H");
-    println!("Welcome!");
+    print!("Welcome!\n>");
+    io::stdout().flush().expect("Flush failed");
 
     // Game loop
     loop {
@@ -44,10 +48,14 @@ fn main() {
         match input.as_str() {
             "help" => println!("{}", HELP_COMMAND),
             "exit" => exit(0),
+            "debug" => println!("Debug"), // Temporary command. Remove later
             "inventory" => open_inventory(&mut player),
-            _ => println!("Command isn't recognised. Type \"help\" for a list of commands."),
+            "w" | "a" | "s" | "d" => walk(&mut player, &input),
+            _ => println!("Type \"help\" for a list of commands"),
         }
         
+        print!(">");
+        io::stdout().flush().expect("Flush failed");
     }
 }
 
@@ -66,5 +74,14 @@ fn open_inventory(player: &mut Player) {
             line += &player.inventory[j as usize];
         }
         println!("{}", line);
+    }
+}
+
+fn walk(player: &mut Player, direction: &str) {
+    match direction {
+        "w" => {player.position = (player.position.0, player.position.1 + 1); println!("You walked forward")},
+        "a" => {player.position = (player.position.0 - 1, player.position.1); println!("You walked left")},
+        "s" => {player.position = (player.position.0, player.position.1 - 1); println!("You walked backwards")},
+        _ => {player.position = (player.position.0 + 1, player.position.1); println!("You walked right")},
     }
 }
