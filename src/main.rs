@@ -35,8 +35,8 @@ fn main() {
         position: (0, 0),
     };
 
-    // Temporary menu
-    print!("\x1B[2J\x1B[1;1H");
+    // Starting text
+    clearscreen::clear().unwrap();
     println!("Welcome!");
 
     // Game loop
@@ -67,7 +67,7 @@ fn get_input() -> String {
     io::stdin().read_line(&mut input).expect("Readline failed");
     let input = input.trim().to_lowercase();
     // Clear screen
-    print!("\x1B[2J\x1B[1;1H");
+    clearscreen::clear().unwrap();
     return input;
 }
 
