@@ -37,18 +37,12 @@ fn main() {
 
     // Temporary menu
     print!("\x1B[2J\x1B[1;1H");
-    print!("Welcome!\n>");
-    io::stdout().flush().expect("Flush failed");
+    println!("Welcome!");
 
     // Game loop
     loop {
         // Get input
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Readline failed");
-        let input = input.trim().to_lowercase();
-
-        // Clear screen
-        print!("\x1B[2J\x1B[1;1H");
+        let input = get_input();
 
         // Process input
         match input.as_str() {
@@ -60,14 +54,23 @@ fn main() {
             "w" | "a" | "s" | "d" => walk(&mut player, &input),
             _ => println!("Type \"help\" for a list of commands"),
         }
-
-        // Nice little arrow typing prompt
-        print!(">");
-        io::stdout().flush().expect("Flush failed");
     }
 }
 
 // Functions
+fn get_input() -> String {
+    // Typing prompt
+    print!(">");
+    io::stdout().flush().expect("Flush failed");
+    // Get input
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Readline failed");
+    let input = input.trim().to_lowercase();
+    // Clear screen
+    print!("\x1B[2J\x1B[1;1H");
+    return input;
+}
+
 fn open_inventory(player: &mut Player) {
     let mut lines: u32 = INV_SIZE / INV_WIDTH;
     if INV_SIZE as f32 / INV_WIDTH as f32 % 1.0 != 0.0 {
@@ -95,24 +98,32 @@ fn open_inventory(player: &mut Player) {
 }
 
 fn walk(player: &mut Player, direction: &str) {
-    let enemy_change = rand::thread_rng().gen_range(0..10); // Use something like this later
+    // Definitely not the optimal way but whatever
+    let enemy_chance = rand::thread_rng().gen_range(0..5);
+    let mut enemy_found: [String; 5] = [EMPTY_STRING; 5];
+    enemy_found[0] = "and encountered an enemy".to_string();
+    // Update position
     match direction {
         "w" => {
             player.position = (player.position.0, player.position.1 + 1);
-            println!("You walked forward")
+            println!("You walked forward {}", enemy_found[enemy_chance])
         }
         "a" => {
             player.position = (player.position.0 - 1, player.position.1);
-            println!("You walked left")
+            println!("You walked left {}", enemy_found[enemy_chance])
         }
         "s" => {
             player.position = (player.position.0, player.position.1 - 1);
-            println!("You walked backwards")
+            println!("You walked backwards {}", enemy_found[enemy_chance])
         }
         _ => {
             player.position = (player.position.0 + 1, player.position.1);
-            println!("You walked right")
+            println!("You walked right {}", enemy_found[enemy_chance])
         }
+    }
+    // Initalize fight with enemy
+    if enemy_chance == 0 {
+        fight(player);
     }
 }
 
@@ -133,4 +144,10 @@ fn stats(player: &mut Player) {
         "Weapon: {}, Armor: {}\nHealth: {}, Defence: {}\nDamage: {}, Speed: {}",
         weapon, armor, player.health, player.defence, player.damage, player.speed
     );
+}
+
+fn fight(player: &mut Player) {
+    println!("1. Fight  2. Flee");
+    let input = get_input();
+    println!("{}", input);
 }
