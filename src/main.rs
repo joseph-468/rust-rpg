@@ -4,6 +4,7 @@ use std::io::Write;
 use std::process::exit;
 
 // Constants
+const FLEE_CHANCE: u32 = 3;
 const INV_SIZE: u32 = 10;
 const INV_WIDTH: u32 = 5;
 const EMPTY_STRING: String = String::new();
@@ -12,7 +13,7 @@ const HELP_COMMAND: &str =
 
 // Classes
 struct Player {
-    health: u32,
+    health: i32,
     defence: u32,
     damage: u32,
     speed: u32,
@@ -20,6 +21,14 @@ struct Player {
     weapon: String,
     armor: String,
     position: (i32, i32), // x, y centered on 0, 0
+}
+
+struct Enemy {
+    name: String, 
+    health: u32,
+    defence: u32,
+    damage: u32,
+    speed: u32,
 }
 
 fn main() {
@@ -48,7 +57,7 @@ fn main() {
         match input.as_str() {
             "help" => println!("{}", HELP_COMMAND),
             "exit" => exit(0),
-            "debug" => println!("Debug\n"), // Temporary command. Remove later
+            "debug" => println!("Debug\n{}", player.health), // Temporary command. Remove later
             "stats" => stats(&mut player),
             "inventory" => open_inventory(&mut player),
             "w" | "a" | "s" | "d" => walk(&mut player, &input),
@@ -123,7 +132,7 @@ fn walk(player: &mut Player, direction: &str) {
     }
     // Initalize fight with enemy
     if enemy_chance == 0 {
-        fight(player);
+        enemy_encounter(player);
     }
 }
 
@@ -146,8 +155,37 @@ fn stats(player: &mut Player) {
     );
 }
 
-fn fight(player: &mut Player) {
-    println!("1. Fight  2. Flee");
-    let input = get_input();
-    println!("{}", input);
+fn enemy_encounter(player: &mut Player) {
+    loop {
+        println!("1. Fight  2. Flee");
+        let input = get_input();
+        if input == "1" {
+            fight(player, String::from("Slime"));
+            break;
+        }
+        if input == "2" {
+            let flee_success = rand::thread_rng().gen_range(0..FLEE_CHANCE) == 0;
+            if flee_success {
+                println!("You successfully fled the fight");
+            }
+        }
+    }
+}
+
+fn fight(player: &mut Player, enemy_name: String) {
+    println!("You're in a fight with a {}", enemy_name);
+    let mut health: i32 = player.health as i32;
+    let mut enemy = Enemy {
+        name: enemy_name,
+        health: 50,
+        defence: 0,
+        damage: 5,
+        speed: 50,
+    };
+
+    loop {
+        println!("1. Attack 2. Magic");
+        println!("3. Item   4. Flee");
+        let input = get_input();
+    }
 }
