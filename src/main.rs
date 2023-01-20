@@ -11,7 +11,7 @@ const EMPTY_STRING: String = String::new();
 const HELP_COMMAND: &str =
     "inventory: access your inventory\nw, a, s, d: walk forwards, left, backwards or right";
 
-// Classes
+// Useful datatypes
 struct Player {
     health: i32,
     defence: u32,
@@ -24,7 +24,7 @@ struct Player {
 }
 
 struct Enemy {
-    name: String, 
+    name: String,
     health: u32,
     defence: u32,
     damage: u32,
@@ -56,7 +56,6 @@ fn main() {
         // Process input
         match input.as_str() {
             "help" => println!("{}", HELP_COMMAND),
-            "exit" => exit(0),
             "debug" => println!("Debug\n{}", player.health), // Temporary command. Remove later
             "stats" => stats(&mut player),
             "inventory" => open_inventory(&mut player),
@@ -75,6 +74,10 @@ fn get_input() -> String {
     let mut input = String::new();
     io::stdin().read_line(&mut input).expect("Readline failed");
     let input = input.trim().to_lowercase();
+    // Handle exit
+    if input == "exit" {
+        exit(0);
+    }
     // Clear screen
     clearscreen::clear().unwrap();
     return input;
@@ -106,9 +109,28 @@ fn open_inventory(player: &mut Player) {
     }
 }
 
+fn stats(player: &mut Player) {
+    // What even is this
+    let weapon = if player.weapon == "" {
+        "None"
+    } else {
+        &player.weapon
+    };
+    let armor = if player.armor == "" {
+        "None"
+    } else {
+        &player.armor
+    };
+
+    println!(
+        "Weapon: {}, Armor: {}\nHealth: {}, Defence: {}\nDamage: {}, Speed: {}",
+        weapon, armor, player.health, player.defence, player.damage, player.speed
+    );
+}
+
 fn walk(player: &mut Player, direction: &str) {
     // Definitely not the optimal way but whatever
-    let enemy_chance = rand::thread_rng().gen_range(0..5);
+    let enemy_chance = rand::thread_rng().gen_range(0..1);
     let mut enemy_found: [String; 5] = [EMPTY_STRING; 5];
     enemy_found[0] = "and encountered an enemy".to_string();
     // Update position
@@ -136,25 +158,7 @@ fn walk(player: &mut Player, direction: &str) {
     }
 }
 
-fn stats(player: &mut Player) {
-    // What even is this
-    let weapon = if player.weapon == "" {
-        "None"
-    } else {
-        &player.weapon
-    };
-    let armor = if player.armor == "" {
-        "None"
-    } else {
-        &player.armor
-    };
-
-    println!(
-        "Weapon: {}, Armor: {}\nHealth: {}, Defence: {}\nDamage: {}, Speed: {}",
-        weapon, armor, player.health, player.defence, player.damage, player.speed
-    );
-}
-
+// Fight system
 fn enemy_encounter(player: &mut Player) {
     loop {
         println!("1. Fight  2. Flee");
@@ -164,17 +168,22 @@ fn enemy_encounter(player: &mut Player) {
             break;
         }
         if input == "2" {
-            let flee_success = rand::thread_rng().gen_range(0..FLEE_CHANCE) == 0;
+            let flee_success = flee(None);
             if flee_success {
                 println!("You successfully fled the fight");
+                break;
+            } else {
+                println!("You failed to flee the fight");
+                fight(player, String::from("Slime"));
+                break;
             }
         }
     }
 }
 
 fn fight(player: &mut Player, enemy_name: String) {
-    println!("You're in a fight with a {}", enemy_name);
     let mut health: i32 = player.health as i32;
+    let mut player_turn: bool = true;
     let mut enemy = Enemy {
         name: enemy_name,
         health: 50,
@@ -183,9 +192,51 @@ fn fight(player: &mut Player, enemy_name: String) {
         speed: 50,
     };
 
+    // The fight
     loop {
-        println!("1. Attack 2. Magic");
-        println!("3. Item   4. Flee");
-        let input = get_input();
+        if player_turn {
+            player_turn = false;
+            loop {
+                println!(
+                    "Health: {}    {} Health: {}",
+                    player.health, enemy.name, enemy.health
+                );
+                println!("1. Attack 2. Magic");
+                println!("3. Item   4. Flee");
+                let input = get_input();
+                match input.as_str() {
+                    "1" => {
+                        println!("sdf");
+                        break;
+                    }
+                    "2" => {
+                        println!("You don't know any magic dumbass");
+                        break;
+                    }
+                    "3" => {
+                        println!("figfsdfsdfsdfht");
+                        break;
+                    }
+                    "4" => {
+                        if flee(None) {
+                            println!("You successfully fled from {}!", enemy.name);
+                        } else {
+                            println!("You failed to flee from {}", enemy.name);
+                        }
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+        } else {
+            player_turn = true;
+            let input = get_input();
+            println!("The enemy did 5 damage");
+            get_input();
+        }
     }
+}
+
+fn flee(chance_modifier: Option<u32>) -> bool {
+    return rand::thread_rng().gen_range(0..FLEE_CHANCE * chance_modifier.unwrap_or(1)) == 0;
 }
