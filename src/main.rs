@@ -14,9 +14,9 @@ const HELP_COMMAND: &str =
 // Useful datatypes
 struct Player {
     health: i32,
-    defence: u32,
-    damage: u32,
-    speed: u32,
+    defence: i32,
+    damage: i32,
+    speed: i32,
     inventory: [String; INV_SIZE as usize],
     weapon: String,
     armor: String,
@@ -25,10 +25,10 @@ struct Player {
 
 struct Enemy {
     name: String,
-    health: u32,
-    defence: u32,
-    damage: u32,
-    speed: u32,
+    health: i32,
+    defence: i32,
+    damage: i32,
+    speed: i32,
 }
 
 fn main() {
@@ -194,6 +194,14 @@ fn fight(player: &mut Player, enemy_name: String) {
 
     // The fight
     loop {
+        if enemy.health <= 0 {
+            println!("Enemy died");
+            break;
+        }
+        if player.health <= 0 {
+            println!("You died");
+            break;
+        }
         if player_turn {
             player_turn = false;
             loop {
@@ -206,7 +214,7 @@ fn fight(player: &mut Player, enemy_name: String) {
                 let input = get_input();
                 match input.as_str() {
                     "1" => {
-                        println!("sdf");
+                        attack(player, &mut enemy, true);
                         break;
                     }
                     "2" => {
@@ -235,6 +243,20 @@ fn fight(player: &mut Player, enemy_name: String) {
             get_input();
         }
     }
+}
+
+fn attack(player: &mut Player, enemy: &mut Enemy, player_attack: bool) -> String {
+    let mut attack_result = String::new();
+    if player_attack {
+        let mut damage: i32 = player.damage - enemy.defence;
+        if damage < 0 {
+            damage = 0;
+        }
+        enemy.health -= damage;
+        attack_result += "Enemy health: ";
+        attack_result += &enemy.health.to_string();
+    }
+    return attack_result;
 }
 
 fn flee(chance_modifier: Option<u32>) -> bool {
