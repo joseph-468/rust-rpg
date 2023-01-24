@@ -182,7 +182,7 @@ fn enemy_encounter(player: &mut Player) {
 }
 
 fn fight(player: &mut Player, enemy_name: String) {
-    let mut health: i32 = player.health as i32;
+    let mut health: i32 = player.health as i32; // Remove this and clone the player instead
     let mut player_turn: bool = true;
     let mut enemy = Enemy {
         name: enemy_name,
