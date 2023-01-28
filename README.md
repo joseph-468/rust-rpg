@@ -9,7 +9,7 @@ cargo build --release
 ```
 ### Run the program
 ```shell-session
-target/release/first_script.exe
+target/release/rust_rpg.exe
 ```
 
 ## About
